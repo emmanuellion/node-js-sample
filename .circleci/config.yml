@@ -1,87 +1,43 @@
 version: 2.1
 
-executors:
-  node-executor:
-    docker:
-      - image: cimg/node:18.16
-    working_directory: ~/repo
-
 jobs:
-  build:
-    executor: node-executor
+  build-and-run-docker:
+    # Utilisation de l'exécuteur "machine" avec une image Ubuntu 22.04
+    machine:
+      image: ubuntu-2204:current
+
     steps:
       - checkout
 
       - run:
-          name: Install Dependencies
-          command: npm install
-
-      - run:
-          name: Install wait-on
-          command: sudo npm install -g wait-on
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package-lock.json" }}
-
-      - run:
-          name: Installer wait-on
-          command: npm install -g wait-on
-
-      - run:
-          name: Start Application
+          name: Construire l'image Docker
           command: |
-            npm run start &
-      
-      - run:
-          name: Attendre que l'Application soit Disponible
-          command: wait-on http://localhost:8080/
+            sudo docker build -t my-app .
 
       - run:
-          name: Test Application with curl
+          name: Vérifier l'image Docker
           command: |
-            curl http://localhost:8080/ || { echo "L'application ne répond pas comme prévu."; exit 1; }
+            sudo docker images | grep my-app
 
       - run:
-          name: Tester l'Application avec curl
+          name: Exécuter le conteneur Docker
           command: |
-            curl --fail http://localhost:8080/ || { echo "L'application ne répond pas comme prévu."; exit 1; }
-
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
-
-  docker_build:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - attach_workspace:
-          at: ~/repo
-
-      - setup_remote_docker:
-          version: 20.10.16
+            sudo docker run -d -p 80:8080 --name my-app-container my-app
 
       - run:
-          name: Build Docker Image
+          name: Tester le conteneur Docker
           command: |
-            docker build -t mabule/node-js-sample:latest .
+            sleep 20  # Attendre que le conteneur soit prêt
+            curl -X GET http://127.0.0.1/users || (echo "Le conteneur Docker n'a pas répondu comme prévu" && exit 1)
 
       - run:
-          name: Login to DockerHub
-          command: echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-
-      - run:
-          name: Push Docker Image
+          name: Nettoyer le conteneur Docker
           command: |
-            docker push mabule/node-js-sample:latest
+            sudo docker stop my-app-container
+            sudo docker rm my-app-container
 
 workflows:
   version: 2
-  build_and_deploy:
+  build-and-run:
     jobs:
-      - build
-      - docker_build:
-          requires:
-            - build
+      - build-and-run-docker
