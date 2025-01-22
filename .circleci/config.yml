@@ -48,7 +48,7 @@ jobs:
       - run:
           name: Build Docker Image
           command: |
-            docker build -t your-dockerhub-username/node-js-sample:latest .
+            docker build -t mabule/node-js-sample:latest .
 
       - run:
           name: Login to DockerHub
@@ -57,7 +57,7 @@ jobs:
       - run:
           name: Push Docker Image
           command: |
-            docker push your-dockerhub-username/node-js-sample:latest
+            docker push mabule/node-js-sample:latest
 
 workflows:
   version: 2
