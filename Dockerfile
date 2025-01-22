@@ -31,7 +31,7 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Expose the application port (adjust if different)
-EXPOSE 8080
+EXPOSE 80
 
 # Define the command to run the application
 CMD ["node", "app.js"]
