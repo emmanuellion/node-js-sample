@@ -16,6 +16,10 @@ jobs:
           name: Install Dependencies
           command: npm install
 
+      - run:
+          name: Install wait-on
+          command: npm install -g wait-on
+
       - save_cache:
           paths:
             - node_modules
