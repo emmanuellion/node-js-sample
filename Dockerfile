@@ -1,37 +1,20 @@
-# Stage 1: Build Stage
-FROM ubuntu-2204:current AS build
+# Use the official Node.js image as the base image
+FROM node:18
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
 # Install dependencies
-COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install
 
-# Copy source code
+# Copy the rest of the application code
 COPY . .
 
-# Stage 2: Production Stage
-FROM ubuntu-2204:current
+# Expose the port the app runs on
+EXPOSE 8080
 
-# Create a non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# Set working directory
-WORKDIR /app
-
-# Copy only the necessary files from the build stage
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app ./
-
-# Change ownership to the non-root user
-RUN chown -R appuser:appgroup /app
-
-# Switch to the non-root user
-USER appuser
-
-# Expose the application port (adjust if different)
-EXPOSE 80
-
-# Define the command to run the application
-CMD ["node", "app.js"]
+# Define the command to run the app
+CMD ["npm", "start"]
