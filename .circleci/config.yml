@@ -18,7 +18,7 @@ jobs:
 
       - run:
           name: Install wait-on
-          command: npm install -g wait-on
+          command: sudo npm install -g wait-on
 
       - save_cache:
           paths:
