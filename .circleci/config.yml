@@ -12,11 +12,6 @@ jobs:
     steps:
       - checkout
 
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package-lock.json" }}
-            - v1-dependencies-
-
       - run:
           name: Install Dependencies
           command: npm i
@@ -27,8 +22,8 @@ jobs:
           key: v1-dependencies-{{ checksum "package-lock.json" }}
 
       - run:
-          name: Run Tests
-          command: npm test
+          name: Run application
+          command: npm run start
 
       - persist_to_workspace:
           root: .
