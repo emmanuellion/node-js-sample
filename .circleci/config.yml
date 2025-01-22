@@ -22,18 +22,27 @@ jobs:
           key: v1-dependencies-{{ checksum "package-lock.json" }}
 
       - run:
+          name: Installer wait-on
+          command: npm install -g wait-on
+
+      - run:
           name: Start Application
           command: |
             npm run start &
       
       - run:
-          name: Wait for Application to Start
-          command: sleep 5
+          name: Attendre que l'Application soit Disponible
+          command: wait-on http://localhost:8080/
 
       - run:
           name: Test Application with curl
           command: |
             curl http://localhost:8080/ || { echo "L'application ne répond pas comme prévu."; exit 1; }
+
+      - run:
+          name: Tester l'Application avec curl
+          command: |
+            curl --fail http://localhost:8080/ || { echo "L'application ne répond pas comme prévu."; exit 1; }
 
       - persist_to_workspace:
           root: .
