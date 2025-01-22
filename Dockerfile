@@ -1,5 +1,5 @@
 # Stage 1: Build Stage
-FROM node:18-alpine AS build
+FROM ubuntu-2204:current AS build
 
 # Set working directory
 WORKDIR /app
@@ -12,7 +12,7 @@ RUN npm ci --only=production
 COPY . .
 
 # Stage 2: Production Stage
-FROM node:18-alpine
+FROM ubuntu-2204:current
 
 # Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
